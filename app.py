@@ -1,10 +1,24 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 import yfinance as yf
 import altair as alt
+import streamlit as st
 
+st.title('Stock Prices of US companies')
 
-days = 20                                           #range
+st.sidebar.write("""
+# GAFA Stock Prices
+This is a stock price acquisition tool. You can specify the number of days to display from the following options.
+""")
+
+st.sidebar.write("""
+## Select the number of days to display
+""")
+
+days = st.sidebar.slider('Number of days', 1, 50, 20)       #range
+
+st.write(f"""
+### GAFA's stock price over the past **{days}days**
+""")
 
 tickers = {
     'Apple': 'AAPL',
@@ -16,6 +30,8 @@ tickers = {
 
 }
 
+
+@st.cache
 def get_data(days, tickers):
     df = pd.DataFrame()  # Container for info
 
@@ -32,23 +48,32 @@ def get_data(days, tickers):
 
 get_data(days, tickers)
 
-companies = ['Apple', 'Facebook']
-data = df.loc[companies]
-data.sort_index() #organaize to alphabetical order
-data = data.T.reset_index() #organaize to take data for graph
-data = pd.melt(data, id_vars=['Date']).rename(
-    columns={'value': 'Stock Prices(USD)'}
-) #organaize to take data for graph
+st.sidebar.write("""
+## Select the Stock Price Range 
+""")
 
-
-ymin, ymax = 100, 250
-
-chart = (
-    alt.Chart(data)
-    .mark_line(opacity=0.8, clip= True)
-    .encode(
-        x="Date:T",
-        y=alt.Y("Stock Prices(USD):Q", stack=None, scale=alt.Scale(domain=[ymin, ymax])),
-        color='Name:N'
-    )
+ymin, ymax = st.sidebar.slider(
+    'Specify the range',
+    0.0, 3500.0, (0.0, 3500.0)
 )
+
+# companies = ['Apple', 'Facebook']
+# data = df.loc[companies]
+# data.sort_index() #organaize to alphabetical order
+# data = data.T.reset_index() #organaize to take data for graph
+# data = pd.melt(data, id_vars=['Date']).rename(
+#     columns={'value': 'Stock Prices(USD)'}
+# ) #organaize to take data for graph
+
+
+# ymin, ymax = 100, 250
+
+# chart = (                               #Chart
+#     alt.Chart(data)
+#     .mark_line(opacity=0.8, clip= True)
+#     .encode(
+#         x="Date:T",
+#         y=alt.Y("Stock Prices(USD):Q", stack=None, scale=alt.Scale(domain=[ymin, ymax])),
+#         color='Name:N'
+#     )
+# )
