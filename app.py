@@ -35,51 +35,57 @@ def get_data(days, tickers):
         df = pd.concat([df, hist])  # update
     return df
 
-st.sidebar.write("""
-## Select the Stock Price Range 
-""")
+try:
+    st.sidebar.write("""
+    ## Select the Stock Price Range 
+    """)
 
-ymin, ymax = st.sidebar.slider(
-    'Specify the range',
-    0.0, 3500.0, (0.0, 3500.0)
-)
-
-tickers = {
-    'Apple': 'AAPL',
-    'Facebook': 'FB',
-    'Google': 'GOOGL',
-    'Microsoft': 'MSFT',
-    'Netflix': 'NFLX',
-    'Amazon': 'AMZN'
-
-}
-
-df = get_data(days, tickers)
-
-companies = st.multiselect(
-    'Select companies',
-    list(df.index),
-    ['Google', 'Apple', 'Facebook', 'Amazon']
-)
-
-if not companies:
-    st.error('Please select at least one company')
-else:
-    data = df.loc[companies]
-    st.write("### Stock Price(USD)", data.sort_index()) # organaize to alphabetical order
-    data = data.T.reset_index()  # organaize to take data for graph
-    data = pd.melt(data, id_vars=['Date']).rename(
-        columns={'value': 'Stock Prices(USD)'}
-    )  # organaize to take data for graph
-
-chart = (                               #Chart
-    alt.Chart(data)
-    .mark_line(opacity=0.8, clip= True)
-    .encode(
-        x="Date:T",
-        y=alt.Y("Stock Prices(USD):Q", stack=None, scale=alt.Scale(domain=[ymin, ymax])),
-        color='Name:N'
+    ymin, ymax = st.sidebar.slider(
+        'Specify the range',
+        0.0, 3500.0, (0.0, 3500.0)
     )
-)
 
-st.altair_chart(chart, use_container_width=True)
+    tickers = {
+        'Apple': 'AAPL',
+        'Facebook': 'FB',
+        'Google': 'GOOGL',
+        'Microsoft': 'MSFT',
+        'Netflix': 'NFLX',
+        'Amazon': 'AMZN'
+
+    }
+
+    df = get_data(days, tickers)
+
+    companies = st.multiselect(
+        'Select companies',
+        list(df.index),
+        ['Google', 'Apple', 'Facebook', 'Amazon']
+    )
+
+    if not companies:
+        st.error('Please select at least one company')
+    else:
+        data = df.loc[companies]
+        st.write("### Stock Price(USD)", data.sort_index())  # organaize to alphabetical order
+        data = data.T.reset_index()  # organaize to take data for graph
+        data = pd.melt(data, id_vars=['Date']).rename(
+            columns={'value': 'Stock Prices(USD)'}
+        )  # organaize to take data for graph
+
+    chart = (  # Chart
+        alt.Chart(data)
+        .mark_line(opacity=0.8, clip=True)
+        .encode(
+            x="Date:T",
+            y=alt.Y("Stock Prices(USD):Q", stack=None, scale=alt.Scale(domain=[ymin, ymax])),
+            color='Name:N'
+        )
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+except:
+    st.error(
+        "Oops! something is in error"
+    )
+
