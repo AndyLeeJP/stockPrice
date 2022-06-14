@@ -20,17 +20,6 @@ st.write(f"""
 ### GAFA's stock price over the past **{days}days**
 """)
 
-tickers = {
-    'Apple': 'AAPL',
-    'Facebook': 'FB',
-    'Google': 'GOOGL',
-    'Microsoft': 'MSFT',
-    'Netflix': 'NFLX',
-    'Amazon': 'AMZN'
-
-}
-
-
 @st.cache
 def get_data(days, tickers):
     df = pd.DataFrame()  # Container for info
@@ -46,8 +35,6 @@ def get_data(days, tickers):
         df = pd.concat([df, hist])  # update
     return df
 
-get_data(days, tickers)
-
 st.sidebar.write("""
 ## Select the Stock Price Range 
 """)
@@ -57,23 +44,42 @@ ymin, ymax = st.sidebar.slider(
     0.0, 3500.0, (0.0, 3500.0)
 )
 
-# companies = ['Apple', 'Facebook']
-# data = df.loc[companies]
-# data.sort_index() #organaize to alphabetical order
-# data = data.T.reset_index() #organaize to take data for graph
-# data = pd.melt(data, id_vars=['Date']).rename(
-#     columns={'value': 'Stock Prices(USD)'}
-# ) #organaize to take data for graph
+tickers = {
+    'Apple': 'AAPL',
+    'Facebook': 'FB',
+    'Google': 'GOOGL',
+    'Microsoft': 'MSFT',
+    'Netflix': 'NFLX',
+    'Amazon': 'AMZN'
 
+}
 
-# ymin, ymax = 100, 250
+df = get_data(days, tickers)
 
-# chart = (                               #Chart
-#     alt.Chart(data)
-#     .mark_line(opacity=0.8, clip= True)
-#     .encode(
-#         x="Date:T",
-#         y=alt.Y("Stock Prices(USD):Q", stack=None, scale=alt.Scale(domain=[ymin, ymax])),
-#         color='Name:N'
-#     )
-# )
+companies = st.multiselect(
+    'Select companies',
+    list(df.index),
+    ['Google', 'Apple', 'Facebook', 'Amazon']
+)
+
+if not companies:
+    st.error('Please select at least one company')
+else:
+    data = df.loc[companies]
+    st.write("### Stock Price(USD)", data.sort_index()) # organaize to alphabetical order
+    data = data.T.reset_index()  # organaize to take data for graph
+    data = pd.melt(data, id_vars=['Date']).rename(
+        columns={'value': 'Stock Prices(USD)'}
+    )  # organaize to take data for graph
+
+chart = (                               #Chart
+    alt.Chart(data)
+    .mark_line(opacity=0.8, clip= True)
+    .encode(
+        x="Date:T",
+        y=alt.Y("Stock Prices(USD):Q", stack=None, scale=alt.Scale(domain=[ymin, ymax])),
+        color='Name:N'
+    )
+)
+
+st.altair_chart(chart, use_container_width=True)
