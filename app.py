@@ -1,3 +1,4 @@
+import traceback
 import pandas as pd
 import yfinance as yf
 import altair as alt
@@ -37,7 +38,7 @@ def get_data(days, tickers):
 
 try:
     st.sidebar.write("""
-    ## Select the Stock Price Range 
+    ## Select the Stock Price Range
     """)
 
     ymin, ymax = st.sidebar.slider(
@@ -84,8 +85,10 @@ try:
     )
 
     st.altair_chart(chart, use_container_width=True)
-except:
+except Exception as e:
     st.error(
-        "Oops! something is in error"
+        "Oops! Something went wrong. Please check the error details below:"
     )
+    st.write(e)
+    st.write(traceback.format_exc())
 
